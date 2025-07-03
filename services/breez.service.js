@@ -4,7 +4,7 @@ const {
 } = require('@breeztech/breez-sdk-liquid/node');
 const dotenv = require('dotenv');
 const JsEventListener = require('../listeners/listen');
-
+const QRCode = require('qrcode');
 dotenv.config();
 
 class BreezService {
@@ -72,9 +72,10 @@ class BreezService {
 
     const minReceiveFee = prepareResponse.feesSat;
     const swapperFee = prepareResponse.swapperFeerate;
+    const url = await QRCode.toDataURL(invoice.destination);
     console.log(`Fee: ${minReceiveFee} sats + ${swapperFee} sats of the sent amount`);
 
-    return { invoice: invoice.destination, fee: minReceiveFee + swapperFee };
+    return { invoice: invoice.destination, fee: minReceiveFee + swapperFee, qr: url };
   }
   
   async createBolt12Invoice(description) {
@@ -89,9 +90,10 @@ class BreezService {
 
     const minReceiveFee = prepareResponse.feesSat;
     const swapperFee = prepareResponse.swapperFeerate;
+    const url = await QRCode.toDataURL(invoice.destination);
     console.log(`Fee: ${minReceiveFee} sats + ${swapperFee} sats of the sent amount`);
 
-    return { invoice: invoice.destination, fee: minReceiveFee + swapperFee };
+    return { invoice: invoice.destination, fee: minReceiveFee + swapperFee, qr: url };
   }
 
   async receiveOnChain(amountMsat, description) {
@@ -112,7 +114,10 @@ class BreezService {
       description: description || "Bitcoin Dev Day"
     });
 
-    return { invoice: receivePayment.destination, fee: receiveFeeSat };
+    const url = await QRCode.toDataURL(receivePayment.destination);
+    console.log(`Fee: ${receiveFeeSat} sats`);
+
+    return { invoice: receivePayment.destination, fee: receiveFeeSat, qr: url };
   }
   
   async pay(destination, amountMsat) {
@@ -165,6 +170,37 @@ class BreezService {
       }
       default:
         throw new Error('Invalid invoice type');
+    }
+  }
+
+  // Sign message 
+
+  async signMessage(message) {
+    const signResponse = await this.sdk.signMessage({message});
+
+    const info = await this.sdk.getInfo(); 
+
+    return {
+        signature: signResponse.signature,
+        pubkey: info.walletInfo.pubkey,
+        message: message,
+    }
+    
+  }
+
+  // Verify signature
+
+  async verifySignature(signature,pubkey, message) {
+    const verifyResponse = await this.sdk.checkMessage({
+        message: message, 
+        pubkey: pubkey,
+        signature: signature
+    }); 
+
+    const isValid = verifyResponse.isValid
+
+    return {
+        status: isValid
     }
   }
 }
