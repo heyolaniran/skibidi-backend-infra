@@ -100,6 +100,30 @@ Pay any BOLT 11, BOLT 12, or Bitcoin address.
 }
 ```
 
+### `POST /sign-message`
+
+Sign a message with the wallet's private key.
+
+**Body:**
+```json
+{
+  "message": "The message to sign"
+}
+```
+
+### `POST /verify-message`
+
+Verify a signature against a message and public key.
+
+**Body:**
+```json
+{
+  "message": "The message that was signed",
+  "pubkey": "The public key of the signer",
+  "signature": "The signature to verify"
+}
+```
+
 ## 🏗️ Architecture
 
 This project follows a standard Model-View-Controller (MVC)-like pattern, separating concerns to improve maintainability and scalability.
