@@ -116,6 +116,12 @@ This project follows a standard Model-View-Controller (MVC)-like pattern, separa
 
 This structure ensures that the core business logic (`BreezService`) is decoupled from the web layer (controllers and routes), making the application easier to test, debug, and extend.
 
+## 📚 API Documentation
+
+This project uses Swagger to provide interactive API documentation. Once the server is running, you can access the documentation by navigating to [/api-docs](http://localhost:3000/api-docs) in your browser.
+
+The documentation is automatically generated from the JSDoc comments in the `routes/` files, so it will always be up-to-date with the latest API changes.
+
 ## 📜 Logging
 
 This API uses a NestJS-style logger for clear and informative console output. All events from the Breez SDK are also logged to `events.log` in JSON format for easy analysis.
