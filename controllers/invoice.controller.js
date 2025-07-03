@@ -18,7 +18,7 @@ const getHealth = (req, res) => {
 /**
  * Create a standard BOLT 11 invoice 
  * @param {amountMsat , description } req 
- * @param { invoiceData : { invoice : string, fee : number } } res 
+ * @param { invoiceData : { invoice : string, fee : number, qr : string } } res 
  */
 const createInvoice = async (req, res) => {
   const { amountMsat, description } = req.body;
@@ -39,7 +39,7 @@ const createInvoice = async (req, res) => {
 /**
  * Create a BOLT 12 invoice 
  * @param {description } req 
- * @param { invoiceData : { invoice : string, fee : number } } res 
+ * @param { invoiceData : { invoice : string, fee : number, qr : string } } res 
  */
 const createBolt12Invoice = async (req, res) => {
   const { description } = req.body;
@@ -57,7 +57,7 @@ const createBolt12Invoice = async (req, res) => {
 /**
  * Get a Bitcoin address for on-chain payments
  * @param {amountMsat , description } req 
- * @param { onchainData : { invoice : string, fee : number } } res 
+ * @param { onchainData : { invoice : string, fee : number, qr : string } } res 
  */
 const receiveOnChain = async (req, res) => {
   const { amountMsat, description } = req.body;
@@ -95,10 +95,49 @@ const payInvoice = async (req, res) => {
   }
 };
 
+
+/**
+ * Sign a message
+ * @param {message } req 
+ * @param { signature : string, pubkey : string, message : string } res 
+ */
+const signMessage = async (req, res) => {
+    const { message } = req.body;
+    if (!message) {
+        return res.status(400).json({ error: 'message is required' });
+    }
+
+    try {
+        const signatureData = await breezService.signMessage(message);
+        res.status(200).json({ ...signatureData });
+    } catch (error) {
+        console.error('Error signing message:', error);
+        res.status(500).json({ error: error.message });
+    }
+}
+
+const verifyMessage = async (req, res) => {
+    const { signature, pubkey, message } = req.body;
+    
+    if(!signature ||! pubkey || !message) {
+        return res.status(400).json({ error: 'signature, pubkey, and message are required' });
+    }
+
+    try {
+        const signatureData = await breezService.verifySignature(signature, pubkey, message);
+        res.status(200).json({ ...signatureData });
+    } catch (error) {
+        console.error('Error verifying message:', error);
+        res.status(500).json({ error: error.message });
+    }
+}
+
 module.exports = {
   getHealth,
   createInvoice,
   createBolt12Invoice,
   receiveOnChain,
   payInvoice,
+  signMessage,
+  verifyMessage
 };
