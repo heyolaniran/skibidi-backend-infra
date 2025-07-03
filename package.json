@@ -1,0 +1,27 @@
+{
+  "name": "breez-invoice-api",
+  "version": "1.0.0",
+  "description": "An Express API to create and pay invoices using the Breez SDK nodeless implementation.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "breez",
+    "lightning",
+    "invoice",
+    "api",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@breeztech/breez-sdk-liquid": "^0.9.2-rc2",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.10",
+    "winston": "^3.17.0"
+  }
+}
