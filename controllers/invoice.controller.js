@@ -5,9 +5,9 @@ const breezService = require('../services/breez.service');
  * 
  * 
  */
-const getHealth = (req, res) => {
+const getHealth = async (req, res) => {
   try {
-    const healthData = breezService.getHealth();
+    const healthData = await breezService.getHealth();
     res.status(200).json(healthData);
   } catch (error) {
     res.status(500).json({ error: error.message });
