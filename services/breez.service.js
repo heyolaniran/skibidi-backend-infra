@@ -36,10 +36,9 @@ class BreezService {
     }
   }
 
-  getHealth() {
-    if (!this.info) {
-        throw new Error('Breez SDK not initialized');
-    }
+  async getHealth() {
+   
+    this.info = await this.sdk.getInfo(); 
     return {
       status: 'ok',
       message: 'Breez SDK is connected',
