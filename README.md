@@ -1,6 +1,6 @@
 # ⚡ Skibidi Breez Infra ⚡
 
-Welcome to the Skibidi Breez Infra ! This is a powerful Express.js server that lets you create and pay Lightning and on-chain Bitcoin invoices using the Breez Liquid SDK. It's a nodeless, self-custodial solution for seamless Bitcoin payments.
+Welcome to the Skibidi Breez Infra ! This is a powerful Express.js server that lets you create and pay Lightning and on-chain Bitcoin invoices using the Breez Liquid SDK. It's a nodeless, self-custodial solution for seamless Bitcoin payments and messaging verification.
 
 ## ✨ Features
 
@@ -8,6 +8,8 @@ Welcome to the Skibidi Breez Infra ! This is a powerful Express.js server that l
 -   **On-Chain Transactions:** Receive Bitcoin directly to an on-chain address.
 -   **Pay Invoices:** Pay any BOLT 11, BOLT 12, or Bitcoin address.
 -   **Health Check:** A simple endpoint to check the status of your Breez SDK connection.
+-   **Sign Message:** Sign a message with the wallet's private key.
+-   **Verify Message:** Verify a signature against a message and public key.
 -   **Stylish Logging:** Colorful, NestJS-style console logs for easy debugging.
 
 ## 🛠️ Setup
@@ -150,4 +152,3 @@ The documentation is automatically generated from the JSDoc comments in the `rou
 
 This API uses a NestJS-style logger for clear and informative console output. All events from the Breez SDK are also logged to `events.log` in JSON format for easy analysis.
 
----
