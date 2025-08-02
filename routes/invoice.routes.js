@@ -61,6 +61,8 @@ const {
   signMessage,
   verifyMessage,
   handleBitpassa,
+  currencyRates,
+  symbolRate
 } = require('../controllers/invoice.controller');
 
 /**
@@ -285,7 +287,10 @@ router.post('/pay-invoice', payInvoice);
  *              $ref: '#/components/schemas/ErrorResponse'
  */
 
+
 router.post('/handle-bitpassa', handleBitpassa);
+
+
 
 /**
  * @swagger
@@ -375,5 +380,60 @@ router.post('/sign-message', signMessage);
  */
 router.post('/verify-message', verifyMessage);
 
+/**
+ * @swagger
+ * /rates:
+ *   get:
+ *     summary: The rates
+ *     tags: [General]
+ *     responses:
+ *       200:
+ *         description: Get the bitcoin rates in supported fiat currencies
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RatesResponse'
+ *       500:
+ *         description: Service is not connected or an error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/rates', currencyRates);
+
+/**
+ * @swagger
+ * /price:
+ *   post:
+ *     summary: The currency rate
+ *     tags: [General]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - coin
+ *             properties:
+ *               coin:
+ *                 type: string
+ *                 description: The currency to get the rate for.
+ *     responses:
+ *       200:
+ *         description: Get the bitcoin rates in specific fiat currency
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RateResponse'
+ *       500:
+ *         description: Service is not connected or an error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/price', symbolRate);
 
 module.exports = router;
