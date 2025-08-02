@@ -60,6 +60,9 @@ const {
   payInvoice,
   signMessage,
   verifyMessage,
+  handleBitpassa,
+  currencyRates,
+  symbolRate
 } = require('../controllers/invoice.controller');
 
 /**
@@ -243,6 +246,54 @@ router.post('/pay-invoice', payInvoice);
 
 /**
  * @swagger
+ * /handle-bitpassa :
+ *  post: 
+ *    summary: Handle a BitPassa invoice
+ *    tags: [Payments]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            required:
+ *              - address
+ *              - amountMsat
+ *            properties:
+ *              address:
+ *                type: string
+ *                description: The Bitcoin address to receive the payment.
+ *              amountMsat:
+ *                type: integer
+ *                description: The amount to receive in millisatoshis.
+ *    responses:
+ *      200:
+ *        description: The payment details.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/PaymentResponse'
+ *      400:
+ *        description: Bad request, missing parameters or invalid invoice type.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/ErrorResponse'
+ *      500:
+ *        description: Internal server error.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/ErrorResponse'
+ */
+
+
+router.post('/handle-bitpassa', handleBitpassa);
+
+
+
+/**
+ * @swagger
  * /sign-message:
  *   post:
  *     summary: Sign a message
@@ -329,5 +380,60 @@ router.post('/sign-message', signMessage);
  */
 router.post('/verify-message', verifyMessage);
 
+/**
+ * @swagger
+ * /rates:
+ *   get:
+ *     summary: The rates
+ *     tags: [General]
+ *     responses:
+ *       200:
+ *         description: Get the bitcoin rates in supported fiat currencies
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RatesResponse'
+ *       500:
+ *         description: Service is not connected or an error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get('/rates', currencyRates);
+
+/**
+ * @swagger
+ * /price:
+ *   post:
+ *     summary: The currency rate
+ *     tags: [General]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - coin
+ *             properties:
+ *               coin:
+ *                 type: string
+ *                 description: The currency to get the rate for.
+ *     responses:
+ *       200:
+ *         description: Get the bitcoin rates in specific fiat currency
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RateResponse'
+ *       500:
+ *         description: Service is not connected or an error occurred.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post('/price', symbolRate);
 
 module.exports = router;

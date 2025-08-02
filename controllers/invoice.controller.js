@@ -1,5 +1,5 @@
 const breezService = require('../services/breez.service');
-
+const SATOSHIS_IN_BTC = 100_000_000;
 /**
  *  Geth the health of your Express App  then check your balance
  * 
@@ -81,9 +81,15 @@ const receiveOnChain = async (req, res) => {
  * @param { paymentData : { payment : string } } res 
  */
 const payInvoice = async (req, res) => {
-  const { destination, amountMsat } = req.body;
+  const { destination, amountMsat, currency } = req.body;
   if (!destination) {
     return res.status(400).json({ error: 'destination is required' });
+  }
+
+  if(currency) {
+    // get the specified currency rate and convert the amount to sats
+    const rate = await breezService.currencyRate(currency.toUpperCase());
+    amountMsat = (amountMsat / rate) * SATOSHIS_IN_BTC;  
   }
 
   try {
@@ -95,6 +101,47 @@ const payInvoice = async (req, res) => {
   }
 };
 
+const handleBitpassa = async (req, res) => {
+
+  res.status(200).json({status : "in build", message : "this feature is not yet implemented"})
+
+}
+
+/**
+ * Batch payment
+ * @param [{destination , amountMsat }] req 
+ *  
+ */
+/** 
+const batchPayment = async (req, res) => {
+
+  // verify if body is provided
+  if(!req.body){
+    return res.status(400).json({ error: 'body is required' });
+  }
+
+  // verify if the balance can handle all payments
+
+  const totalAmount = req.body.reduce((total, item) => total + item.amountMsat, 0);
+
+  if(totalAmount > breezService.info.walletInfo.balanceSat){
+    return res.status(400).json({ error: 'balance is not enough to handle all payments' });
+  }
+
+  for(details of req.body) {
+    try {
+      const response = await payInvoice({destination : details.destination, amountMsat : details.amountMsat});
+      if(response.status === 200){
+         
+      }
+    } catch (error) {
+      console.error('Error paying invoice:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+}
+
+*/
 
 /**
  * Sign a message
@@ -132,12 +179,38 @@ const verifyMessage = async (req, res) => {
     }
 }
 
+
+const currencyRates = async (req, res) => {
+  const rates = await breezService.currencies(); 
+
+  return res.status(200).json({ rates });
+}
+
+const symbolRate = async (req , res) => {
+  const { coin } = req.body;
+
+  if(!coin){
+    return res.status(400).json({ error: 'coin is required' });
+  }
+
+  try {
+    const rate = await breezService.currencyRate(coin);
+    res.status(200).json({ rate });
+  } catch (error) {
+    console.error('Error getting currency rate:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getHealth,
   createInvoice,
   createBolt12Invoice,
   receiveOnChain,
   payInvoice,
+  handleBitpassa,
   signMessage,
-  verifyMessage
+  verifyMessage,
+  currencyRates,
+  symbolRate
 };

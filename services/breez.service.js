@@ -123,6 +123,7 @@ class BreezService {
     const parsed = await this.sdk.parse(destination);
 
     switch (parsed.type) {
+      // pay to lightning invoice
       case 'bolt11': {
         const prepareResponse = await this.sdk.prepareSendPayment({
           destination: destination,
@@ -134,6 +135,8 @@ class BreezService {
         });
         return sendResponse.payment;
       }
+
+      // pay to bolt12 offer
       case 'bolt12': {
         if (!amountMsat) {
           throw new Error('amountMsat is required for Bolt 12 offers');
@@ -151,6 +154,8 @@ class BreezService {
         });
         return sendBolt12Response.payment;
       }
+
+      // pay to onchain address
       case 'bitcoinAddress': {
         const prepareOnChainResponse = await this.sdk.preparePayOnChain({
           amount: {
@@ -167,6 +172,40 @@ class BreezService {
         console.log(`Payment: ${paymentOnChain}`);
         return paymentOnChain;
       }
+
+      // pay to lightning url
+      case 'lnUrlPay': {
+
+        const amount = {
+          type: 'bitcoin',
+          receiverAmountSat: amountMsat
+        }
+
+        const optionalComment = 'from skibidi-breez'
+        const opttionalValidateSuccessActionUrl = true
+
+        const prepareLnUrlPayResponse = await this.sdk.prepareLnurlPay({
+          data: parsed.data,
+          amount: amountMsat,
+          bip353Address: parsed.bip353Address,
+          comment: optionalComment,
+          validateSuccessActionUrl: opttionalValidateSuccessActionUrl
+        })
+
+        const feesSat = prepareLnUrlPayResponse.feesSat;
+        
+        console.log(`Fee: ${feesSat} sats`);
+
+        // sending the prepared payment
+        const LnPayment = await this.sdk.lnurlPay({
+          prepareResponse : prepareLnUrlPayResponse,
+        })
+
+        console.log(`Payment: ${LnPayment}`); 
+
+        return LnPayment;
+      }
+
       default:
         throw new Error('Invalid invoice type');
     }
@@ -202,6 +241,42 @@ class BreezService {
         status: isValid
     }
   }
+
+  /**
+ * Get list of fiat swap supported
+ */
+
+  async currencies() {
+    const rates = await this.sdk.fetchFiatRates(); 
+
+    return rates; 
+  }
+
+
+  /**
+   * Get rate for one specific currency 
+   * 
+   * @param {currency : string} 
+   * @returns {value : number}
+   * 
+   */
+
+  async currencyRate(coin) {
+    
+    const rates = await this.sdk.fetchFiatRates(); 
+
+    let value = (rates.find(rate => rate.coin === coin)).value;
+
+    if(!value) {
+      throw new Error('The currency is not supported');
+    }
+
+    value = Math.round(value, 2);
+
+    return value;
+    
+  }
+
 }
 
 module.exports = new BreezService();
