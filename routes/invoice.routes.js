@@ -60,6 +60,7 @@ const {
   payInvoice,
   signMessage,
   verifyMessage,
+  handleBitpassa,
 } = require('../controllers/invoice.controller');
 
 /**
@@ -240,6 +241,51 @@ router.post('/receive-onchain', receiveOnChain);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post('/pay-invoice', payInvoice);
+
+/**
+ * @swagger
+ * /handle-bitpassa :
+ *  post: 
+ *    summary: Handle a BitPassa invoice
+ *    tags: [Payments]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            required:
+ *              - address
+ *              - amountMsat
+ *            properties:
+ *              address:
+ *                type: string
+ *                description: The Bitcoin address to receive the payment.
+ *              amountMsat:
+ *                type: integer
+ *                description: The amount to receive in millisatoshis.
+ *    responses:
+ *      200:
+ *        description: The payment details.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/PaymentResponse'
+ *      400:
+ *        description: Bad request, missing parameters or invalid invoice type.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/ErrorResponse'
+ *      500:
+ *        description: Internal server error.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/ErrorResponse'
+ */
+
+router.post('/handle-bitpassa', handleBitpassa);
 
 /**
  * @swagger

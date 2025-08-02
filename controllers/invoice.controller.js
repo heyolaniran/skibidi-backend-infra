@@ -95,6 +95,12 @@ const payInvoice = async (req, res) => {
   }
 };
 
+const handleBitpassa = async (req, res) => {
+
+  res.status(200).json({status : "in build", message : "this feature is not yet implemented"})
+
+}
+
 
 /**
  * Sign a message
@@ -138,6 +144,7 @@ module.exports = {
   createBolt12Invoice,
   receiveOnChain,
   payInvoice,
+  handleBitpassa,
   signMessage,
   verifyMessage
 };

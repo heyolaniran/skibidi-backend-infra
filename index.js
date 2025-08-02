@@ -16,7 +16,7 @@ const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.0',
     info: {
-      title: 'Breez Invoice API',
+      title: 'Skibidi Breez Infra',
       version: '1.0.0',
       description: 'An Express API to build your own self-custodial infrastucture using the Breez SDK nodeless implementation.',
     },
