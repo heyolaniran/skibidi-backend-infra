@@ -101,7 +101,71 @@ const payInvoice = async (req, res) => {
   }
 };
 
+/** Handle Bitpassa Logic
+ * 
+ * Scenario is : Get bunch of data from user like array of JSON objects with destination and amountMsat in specified currency { currency: "USD", invoices : [{destination: "", amountMsat: 100}] }
+ * The next step is to get the total amount in the specified currency
+ * Then convert the amount to sats using the currency rate
+ * Generate a BOLT 11 invoice with the total amount in sats
+ * User will pay the invoice ( this should be tracked with a webhook )
+ * After the payment is confirmed, we will pay the invoices in the array with the specified amountMsat
+ * 
+ * @param {req} req 
+ * @param {res} res
+ * @returns {json} status and message
+ * 
+ * @todo Implement this feature 
+ * @todo Add webhook to track payment status
+ * @todo Add error handling for each step
+ * @todo Add logging for each step
+ * @todo Add tests for each step
+ * @todo Add documentation for each step
+ * @todo Add validation for each step
+ * @todo Add rate limiting for each step
+ * @todo Add caching for each step
+ * @todo Add monitoring for each step
+ * @todo Add alerting for each step
+ */
+
 const handleBitpassa = async (req, res) => {
+
+  // verify if body is provided 
+
+  if(!req.body | !req.body.currency || !req.body.invoices || !Array.isArray(req.body.invoices) || req.body.invoices.length === 0){
+    res.status(400).json({ error: 'body is required and should contain currency and invoices array' });
+    return; 
+  }
+
+  // verify if the currency is supported
+  const supportedCurrencies = await breezService.currencies();
+  if(!supportedCurrencies.includes(req.body.currency.toUpperCase())){
+    res.status(400).json({ error: 'currency is not supported' });
+    return; 
+  }
+  
+  // get the total amount in the specified currency
+  const totalAmount = req.body.invoices.reduce((total, item) => total + item.amountMsat, 0);
+  // convert the amount to sats using the currency rate
+  const rate = await breezService.currencyRate(req.body.currency.toUpperCase());
+  const totalAmountInSats = Math.round((totalAmount / rate) * SATOSHIS_IN_BTC, 2); // rounding to 2 decimal places
+
+
+  // generate a BOLT 11 invoice with the total amount in sats
+  try {
+    const invoiceData = await breezService.createInvoice(totalAmountInSats, `Bitpassa payment for ${req.body.currency}`);
+    // return the invoice data to the user
+    res.status(200).json({ invoice: invoiceData });
+  } catch (error) {
+    console.error('Error creating Bitpassa invoice:', error);
+    res.status(500).json({ error: error.message });
+  }
+
+  // Think about the webhook to track payment status
+
+  // Only after the payment is confirmed or is paid then we should start paying the invoices in the array with the specified amountMsat
+  // This is not implemented yet, so we will just return a message that this feature is not yet implemented
+  // res.status(200).json({status : "in build", message : "this feature is not yet implemented"})
+  // For now, we will just return a message that this feature is not yet implemented
 
   res.status(200).json({status : "in build", message : "this feature is not yet implemented"})
 
@@ -112,7 +176,8 @@ const handleBitpassa = async (req, res) => {
  * @param [{destination , amountMsat }] req 
  *  
  */
-/** 
+
+
 const batchPayment = async (req, res) => {
 
   // verify if body is provided
@@ -125,7 +190,7 @@ const batchPayment = async (req, res) => {
   const totalAmount = req.body.reduce((total, item) => total + item.amountMsat, 0);
 
   if(totalAmount > breezService.info.walletInfo.balanceSat){
-    return res.status(400).json({ error: 'balance is not enough to handle all payments' });
+    return res.status(400).json({ error: 'Sorry, balance is not enough to handle all payments' });
   }
 
   for(details of req.body) {
@@ -141,7 +206,7 @@ const batchPayment = async (req, res) => {
   }
 }
 
-*/
+
 
 /**
  * Sign a message

@@ -85,7 +85,10 @@ const {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+
 router.get('/health', getHealth);
+
+
 /**
  * @swagger
  * /create-invoice:
@@ -127,7 +130,10 @@ router.get('/health', getHealth);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+
 router.post('/create-invoice', createInvoice);
+
+
 /**
  * @swagger
  * /bolt12/create-invoice:
@@ -158,7 +164,11 @@ router.post('/create-invoice', createInvoice);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+
+
 router.post('/bolt12/create-invoice', createBolt12Invoice);
+
+
 /**
  * @swagger
  * /receive-onchain:
@@ -200,7 +210,9 @@ router.post('/bolt12/create-invoice', createBolt12Invoice);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+
 router.post('/receive-onchain', receiveOnChain);
+
 /**
  * @swagger
  * /pay-invoice:
@@ -242,6 +254,7 @@ router.post('/receive-onchain', receiveOnChain);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+
 router.post('/pay-invoice', payInvoice);
 
 /**
