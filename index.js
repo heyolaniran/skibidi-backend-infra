@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const breezService = require('./services/breez.service');
 const invoiceRoutes = require('./routes/invoice.routes');
+const apiKeyGuard = require('./middleware/apiKeyGuard');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
@@ -25,15 +26,25 @@ const swaggerOptions = {
         url: `http://localhost:${process.env.PORT || 3000}`,
       },
     ],
+    components: {
+      securitySchemes: {
+        ApiKeyAuth: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'x-api-key',
+        },
+      },
+    },
+    security: [{ ApiKeyAuth: [] }],
   },
-  apis: ['./routes/*.js'], // Path to the API docs
+  apis: ['./routes/*.js'],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Use the invoice routes for all API endpoints
-app.use('/', invoiceRoutes);
+// Protect all API routes
+app.use('/', apiKeyGuard, invoiceRoutes);
 
 const PORT = process.env.PORT || 3000;
 
