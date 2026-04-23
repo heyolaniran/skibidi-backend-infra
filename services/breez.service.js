@@ -15,24 +15,33 @@ class BreezService {
     this.listener = new JsEventListener();
   }
 
-  async initialize() {
-    try {
-      const BREEZ_API_KEY = process.env.BREEZ_API_KEY;
-      const BREEZ_MNEMONIC = process.env.BREEZ_MNEMONIC;
+  async initialize(retries = 5, delayMs = 3000) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const BREEZ_API_KEY = process.env.BREEZ_API_KEY;
+        const BREEZ_MNEMONIC = process.env.BREEZ_MNEMONIC;
 
-      const config = await defaultConfig('mainnet', BREEZ_API_KEY);
-      console.log('Connecting to Breez...');
-      this.sdk = await connect({ mnemonic: BREEZ_MNEMONIC, config });
-      this.sdk.addEventListener(this.listener);
-      this.info = await this.sdk.getInfo();
-      console.log(`Breez SDK connected. Wallet pubkey: ${this.info.walletInfo.pubkey}`);
+        const config = await defaultConfig('mainnet', BREEZ_API_KEY);
+        console.log(`Connecting to Breez... (attempt ${attempt}/${retries})`);
+        this.sdk = await connect({ mnemonic: BREEZ_MNEMONIC, config });
+        this.sdk.addEventListener(this.listener);
+        this.info = await this.sdk.getInfo();
+        console.log(`Breez SDK connected. Wallet pubkey: ${this.info.walletInfo.pubkey}`);
 
-      this.currentLimits = await this.sdk.fetchLightningLimits();
-      console.log(`Minimum amount, in sats: ${this.currentLimits.receive.minSat}`);
-      console.log(`Maximum amount, in sats: ${this.currentLimits.receive.maxSat}`);
-    } catch (error) {
-      console.error('Failed to initialize Breez SDK:', error);
-      process.exit(1);
+        this.currentLimits = await this.sdk.fetchLightningLimits();
+        console.log(`Minimum amount, in sats: ${this.currentLimits.receive.minSat}`);
+        console.log(`Maximum amount, in sats: ${this.currentLimits.receive.maxSat}`);
+        return;
+      } catch (error) {
+        console.error(`Failed to initialize Breez SDK (attempt ${attempt}/${retries}):`, error.message);
+        if (attempt === retries) {
+          console.error('All retry attempts exhausted. Exiting.');
+          process.exit(1);
+        }
+        console.log(`Retrying in ${delayMs / 1000}s...`);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        delayMs *= 2;
+      }
     }
   }
 
