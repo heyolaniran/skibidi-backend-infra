@@ -1,4 +1,6 @@
+const { randomUUID } = require('crypto');
 const breezService = require('../services/breez.service');
+const paymentStore = require('../services/paymentStore');
 const SATOSHIS_IN_BTC = 100_000_000;
 /**
  *  Geth the health of your Express App  then check your balance
@@ -27,8 +29,10 @@ const createInvoice = async (req, res) => {
   }
 
   try {
+    const paymentToken = randomUUID();
     const invoiceData = await breezService.createInvoice(amountMsat, description);
-    res.status(201).json(invoiceData);
+    paymentStore.add(paymentToken, invoiceData.invoice);
+    res.status(201).json({ ...invoiceData, paymentToken });
   } catch (error) {
     console.error('Error creating invoice:', error);
     res.status(500).json({ error: error.message });
@@ -202,6 +206,15 @@ const symbolRate = async (req , res) => {
   }
 }
 
+const getPaymentStatus = (req, res) => {
+  const { token } = req.params;
+  const entry = paymentStore.get(token);
+  if (!entry) {
+    return res.status(404).json({ error: 'Payment token not found' });
+  }
+  return res.status(200).json({ status: entry.status });
+};
+
 module.exports = {
   getHealth,
   createInvoice,
@@ -212,5 +225,6 @@ module.exports = {
   signMessage,
   verifyMessage,
   currencyRates,
-  symbolRate
+  symbolRate,
+  getPaymentStatus,
 };

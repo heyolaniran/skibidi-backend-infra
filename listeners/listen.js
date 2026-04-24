@@ -1,5 +1,6 @@
 const { createLogger, format, transports } = require('winston');
 const { combine, timestamp, printf, colorize, json } = format;
+const paymentStore = require('../services/paymentStore');
 
 // Custom format for the console to mimic NestJS
 const consoleFormat = combine(
@@ -31,10 +32,29 @@ const logger = createLogger({
 });
 
 class JsEventListener {
-    onEvent(event) {
-        // Stringify the event object to be included in the message
-        logger.info(`Event received: ${JSON.stringify(event, null, 2)}`);
+  onEvent(event) {
+    logger.info(`Event received: ${JSON.stringify(event, null, 2)}`);
+
+    try {
+      if (event.type !== 'paymentSucceeded') return;
+
+      // event.details IS the payment object (not event.details.payment)
+      const details = event.details;
+      if (!details || details.paymentType !== 'receive') return;
+
+      // destination holds the original BOLT11 invoice string
+      const destination = details.destination || details.details?.invoice;
+      if (destination) {
+        const token = paymentStore.findByInvoice(destination);
+        if (token) {
+          paymentStore.markPaid(token);
+          logger.info(`Payment confirmed for token: ${token}`);
+        }
+      }
+    } catch (err) {
+      logger.error(`Error processing payment event: ${err.message}`);
     }
+  }
 }
 
 module.exports = JsEventListener;

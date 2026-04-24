@@ -62,7 +62,8 @@ const {
   verifyMessage,
   handleBitpassa,
   currencyRates,
-  symbolRate
+  symbolRate,
+  getPaymentStatus,
 } = require('../controllers/invoice.controller');
 
 /**
@@ -435,5 +436,34 @@ router.get('/rates', currencyRates);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post('/price', symbolRate);
+
+/**
+ * @swagger
+ * /payment-status/{token}:
+ *   get:
+ *     summary: Poll the status of a pending payment
+ *     tags: [Payments]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The payment token returned by /create-invoice
+ *     responses:
+ *       200:
+ *         description: Payment status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [pending, paid]
+ *       404:
+ *         description: Token not found
+ */
+router.get('/payment-status/:token', getPaymentStatus);
 
 module.exports = router;

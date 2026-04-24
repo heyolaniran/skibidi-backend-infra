@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #09090b;
+  color: #fff;
+}
+
+/* Make react-youtube iframe fill its wrapper */
+.yt-embed,
+.yt-embed iframe {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}

@@ -3,7 +3,10 @@ const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const breezService = require('./services/breez.service');
 const invoiceRoutes = require('./routes/invoice.routes');
+const wifiRoutes = require('./routes/wifi.routes');
 const apiKeyGuard = require('./middleware/apiKeyGuard');
+// Instantiate early so it registers the paymentStore 'paid' listener before any payment lands
+require('./services/wifiAccess');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
@@ -45,6 +48,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Protect all API routes
 app.use('/', apiKeyGuard, invoiceRoutes);
+app.use('/', apiKeyGuard, wifiRoutes);
 
 const PORT = process.env.PORT || 3000;
 
